@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)] [string] $Driver,
     [Parameter(Mandatory)] [string] $Client,
-    [ValidateSet('SelfTest', 'Stress')] [string] $Mode = 'SelfTest'
+    [ValidateSet('Query', 'SelfTest', 'Stress')] [string] $Mode = 'SelfTest'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -41,8 +41,11 @@ try {
     $registered = $true
     Invoke-ServiceControl start $name
     $started = $true
-    $argument = if ($Mode -eq 'Stress') { '--stress' } else { '--self-test' }
-    & $clientPath $argument
+    switch ($Mode) {
+        'Query' { & $clientPath }
+        'Stress' { & $clientPath --stress }
+        'SelfTest' { & $clientPath --self-test }
+    }
     if ($LASTEXITCODE -ne 0) { throw "Client test failed ($LASTEXITCODE)" }
 } finally {
     if ($registered) {

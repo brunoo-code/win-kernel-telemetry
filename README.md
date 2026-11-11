@@ -12,6 +12,14 @@ flowchart LR
 
 O driver cria um dispositivo de controle com acesso a **SYSTEM e administradores**. Expõe um único IOCTL de leitura com `METHOD_BUFFERED`, rejeita entrada extra e valida o tamanho do buffer. Um spin lock mantém os contadores e a resposta coerentes entre chamadas simultâneas. O contrato contém apenas números de versão, tempo e contadores do próprio driver.
 
+## Painel BNQQ Driver Lab
+
+Abra o atalho **BNQQ Driver Lab** na área de trabalho da VM. **Consultar driver** registra uma leitura. **Rodar teste de carga** executa 2.000 consultas concorrentes e duas leituras de controle. **Exportar relatório** grava em texto a saída das operações da sessão, inclusive os códigos de saída. Cada operação carrega o driver em um serviço temporário e o descarrega ao terminar.
+
+Para montar o painel em outro convidado Hyper‑V já preparado para testes de drivers, coloque `panel/BNQQ-Driver-Lab.ps1`, `scripts/test-in-guest.ps1`, o cliente compilado `telemetry-client.exe` e o driver de teste assinado `BnqqKernelTelemetry.sys` na mesma pasta. Abra o painel pelo Windows PowerShell com privilégios de administrador.
+
+O [wallpaper BNQQ System Engineering](panel/BNQQ-Wallpaper.png) acompanha o projeto. Para aplicá-lo ao usuário conectado no convidado, execute `panel/Set-LabWallpaper.ps1`. A opção `-LockInLab` mantém a imagem definida pela política de personalização desse usuário. Um administrador da VM pode reverter a política. Baixar o repositório ou o wallpaper não muda a área de trabalho.
+
 | Campo | Tipo | Conteúdo |
 | --- | --- | --- |
 | `size`, `abi_version` | 2 × uint32 | Tamanho e versão do contrato |

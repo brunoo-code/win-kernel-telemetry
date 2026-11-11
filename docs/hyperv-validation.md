@@ -65,3 +65,14 @@ Rejected: 0
 ```
 
 O valor de 325 ms é o tempo de atividade do driver no instante da leitura final. Esta execução verificou a consistência dos contadores sob concorrência. O serviço terminou em `STOPPED`, a remoção retornou `DeleteService SUCCESS` e uma consulta posterior confirmou que ele não estava mais registrado.
+
+## Validação do painel
+
+O painel WinForms foi aberto na sessão de área de trabalho da VM. O modo de teste acionou os botões **Consultar driver** e **Rodar teste de carga** e chamou a mesma rotina de gravação usada pelo botão **Exportar relatório**. O arquivo exportado registrou:
+
+| Operação | Requisições | Aceitas | Rejeitadas | Código de saída |
+| --- | ---: | ---: | ---: | ---: |
+| Consultar driver | 1 | 1 | 0 | 0 |
+| Rodar teste de carga | 2.002 | 2.002 | 0 | 0 |
+
+O atalho foi instalado na área de trabalho, e a política do wallpaper foi conferida na conta do laboratório. Após verificar que o serviço do driver havia sido removido, o Hyper‑V confirmou o checkpoint de produção **BNQQ Driver Lab - painel validado**.
