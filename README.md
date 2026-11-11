@@ -46,12 +46,12 @@ Em um convidado Windows preparado para drivers de teste, execute o roteiro com o
 
 O autoteste envia uma consulta válida, um IOCTL desconhecido, uma consulta com entrada indevida, uma com saída curta e uma consulta final para conferir os contadores. O [roteiro do WinDbg](docs/windbg.md) mostra como interromper a primeira requisição e comparar a estrutura em kernel com a saída no cliente.
 
-Com o driver já carregado na VM, `telemetry-client --stress` abre oito conexões Win32 independentes e envia 2.000 consultas. Execute sem outros clientes conectados. O teste verifica a sequência de cada conexão e exige que a diferença do contador de sucesso corresponda às consultas dos trabalhadores e à leitura final. Use o depurador sem breakpoint por requisição durante esse teste.
+Para rodar a carga na VM, use o mesmo script com `-Mode Stress`. O cliente abre oito conexões Win32 independentes e envia 2.000 consultas. Execute sem outros clientes conectados e sem breakpoint por requisição. O teste verifica a sequência de cada conexão e confere a contagem final.
 
 ## Validação desta versão
 
 - **Verificado no Windows x64:** compilação e link do driver com MSVC/WDK, compilação do cliente Win32 e teste do contrato de telemetria via CTest.
 - **Verificado no Hyper‑V:** o driver carregou em Windows Server 2025 x64, o cliente confirmou duas consultas aceitas e três rejeitadas, e o depurador capturou as cinco chamadas no kernel. O serviço foi parado e removido ao final. [Relatório da execução e evidências](docs/hyperv-validation.md)
-- **Teste de concorrência:** o cliente com `--stress` foi compilado no Windows. A execução concorrente no convidado está pendente.
+- **Teste de concorrência no Hyper‑V:** 8 conexões, 2.000 consultas de carga e 2 leituras de controle. O driver registrou 2.002 aceitas e 0 rejeitadas. [Relatório da carga](docs/hyperv-validation.md#teste-de-carga-concorrente)
 
 Referências: [segurança de objetos de dispositivo](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/windows-security-model) e [configuração do KDNET](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-network-debugging-connection-automatically).

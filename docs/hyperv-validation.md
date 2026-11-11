@@ -42,3 +42,26 @@ Rejected: 3
 O script registrou o driver como `RUNNING` antes do teste e `STOPPED` depois. A remoção do serviço retornou `[SC] DeleteService SUCCESS`.
 
 A primeira execução revelou que o cliente dependia do runtime MSVC, ausente no convidado. O cliente foi recompilado com link estático do runtime e a segunda execução passou. O teste cobre carga, consulta, rejeição dos três formatos inválidos e descarga. O breakpoint captura a requisição na entrada. Os contadores foram verificados na resposta do cliente.
+
+## Teste de carga concorrente
+
+Em 11 de novembro de 2026, a VM **BNQQ-Driver-Lab** no Hyper‑V executou o cliente em Windows Server 2025 Datacenter Evaluation x64 (build 26100, dois processadores virtuais). O depurador foi retomado com os breakpoints limpos para que cada chamada pudesse seguir sem interrupção.
+
+Em PowerShell elevado no convidado, com o driver assinado para a VM:
+
+```powershell
+.\scripts\test-in-guest.ps1 -Driver C:\Lab\BnqqKernelTelemetry.sys -Client C:\Lab\telemetry-client.exe -Mode Stress
+```
+
+Cada uma das oito conexões de carga fez 250 consultas. O cliente verificou a sequência de contadores em cada conexão. Uma conexão de controle fez uma leitura antes e outra depois, totalizando **2.002 requisições**.
+
+```text
+PASS: 8 independent handles, 2000 worker queries
+ABI version: 1
+Driver uptime (ms): 325
+Requests: 2002
+Succeeded: 2002
+Rejected: 0
+```
+
+O valor de 325 ms é o tempo de atividade do driver no instante da leitura final. Esta execução verificou a consistência dos contadores sob concorrência. O serviço terminou em `STOPPED`, a remoção retornou `DeleteService SUCCESS` e uma consulta posterior confirmou que ele não estava mais registrado.

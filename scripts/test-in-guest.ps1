@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $Driver,
-    [Parameter(Mandatory)] [string] $Client
+    [Parameter(Mandatory)] [string] $Client,
+    [ValidateSet('SelfTest', 'Stress')] [string] $Mode = 'SelfTest'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,7 +41,8 @@ try {
     $registered = $true
     Invoke-ServiceControl start $name
     $started = $true
-    & $clientPath --self-test
+    $argument = if ($Mode -eq 'Stress') { '--stress' } else { '--self-test' }
+    & $clientPath $argument
     if ($LASTEXITCODE -ne 0) { throw "Client test failed ($LASTEXITCODE)" }
 } finally {
     if ($registered) {
