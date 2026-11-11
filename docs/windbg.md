@@ -1,12 +1,12 @@
 # Demo no WinDbg
 
-Este roteiro está pronto para execução. Ainda não há captura de uma sessão de kernel para esta versão.
+O [relatório do Hyper‑V](hyperv-validation.md) registra uma execução real via KD, o depurador de kernel por linha de comando incluído no pacote WinDbg. Os comandos abaixo também podem ser usados na interface gráfica do WinDbg.
 
 ## Preparação
 
 1. Use uma VM Windows x64 descartável, com snapshot e provisionada para testes de drivers. Assine o `.sys` de acordo com o ambiente do convidado. A [documentação de assinatura de teste da Microsoft](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/test-signing) explica as opções.
 2. Copie o driver assinado e o cliente para o convidado. Mantenha o PDB produzido pelo mesmo build em uma pasta de símbolos acessível ao WinDbg.
-3. Conecte o WinDbg do host ao convidado usando [KDNET](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-network-debugging-connection-automatically). A configuração inicial de depuração pode exigir reinício **do convidado**.
+3. Conecte o depurador do host ao convidado por uma [porta serial virtual do Hyper‑V](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/attaching-to-a-virtual-machine--kernel-mode-) ou por [KDNET](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-network-debugging-connection-automatically). A execução registrada usou a porta serial, com a rede do convidado desconectada. A configuração inicial de depuração pode exigir reinício **do convidado**.
 
 ## Capturar uma consulta
 

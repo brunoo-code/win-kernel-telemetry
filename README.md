@@ -49,6 +49,6 @@ O autoteste envia uma consulta válida, um IOCTL desconhecido, uma consulta com 
 ## Validação desta versão
 
 - **Verificado no Windows x64:** compilação e link do driver com MSVC/WDK, compilação do cliente Win32 e teste do contrato de telemetria via CTest.
-- **Pendente em VM:** assinatura e carga no convidado, execução do autoteste via `DeviceIoControl`, descarga e captura no WinDbg. O host desta sessão negou a consulta às VMs do Hyper‑V.
+- **Verificado no Hyper‑V:** o driver carregou em Windows Server 2025 x64, o cliente confirmou duas consultas aceitas e três rejeitadas, e o depurador capturou as cinco chamadas no kernel. O serviço foi parado e removido ao final. [Relatório da execução e evidências](docs/hyperv-validation.md)
 
 Referências: [segurança de objetos de dispositivo](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/windows-security-model) e [configuração do KDNET](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-network-debugging-connection-automatically).
