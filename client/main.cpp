@@ -1,7 +1,11 @@
 #include <windows.h>
 
 #include <iostream>
+#include <chrono>
+#include <future>
 #include <string_view>
+#include <thread>
+#include <vector>
 #include "../include/telemetry.hpp"
 
 namespace {
@@ -63,16 +67,59 @@ bool self_test(HANDLE device, const telemetry::Snapshot& before, telemetry::Snap
     return true;
 }
 
+bool stress_test(HANDLE device, const telemetry::Snapshot& before, telemetry::Snapshot& after) {
+    constexpr int clients = 8;
+    constexpr int queries = 250;
+    const auto start = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+    std::vector<std::future<bool>> jobs;
+    try {
+        for (int i = 0; i < clients; ++i) {
+            jobs.push_back(std::async(std::launch::async, [start, queries] {
+                const Device connection;
+                if (connection.handle == INVALID_HANDLE_VALUE) return false;
+                std::this_thread::sleep_until(start);
+                telemetry::Snapshot previous{};
+                for (int n = 0; n < queries; ++n) {
+                    telemetry::Snapshot current{};
+                    if (!snapshot(connection.handle, current) ||
+                        current.succeeded <= previous.succeeded ||
+                        current.uptime_100ns < previous.uptime_100ns) {
+                        return false;
+                    }
+                    previous = current;
+                }
+                return true;
+            }));
+        }
+        bool passed = true;
+        for (auto& job : jobs) {
+            if (!job.get()) passed = false;
+        }
+        if (!passed || !snapshot(device, after)) return false;
+    } catch (const std::exception& error) {
+        std::cerr << "Could not run stress test: " << error.what() << '\n';
+        return false;
+    }
+    if (after.succeeded != before.succeeded + clients * queries + 1 ||
+        after.rejected != before.rejected || after.uptime_100ns < before.uptime_100ns) {
+        std::cerr << "Stress test accounting mismatch; run without other clients\n";
+        return false;
+    }
+    std::cout << "PASS: " << clients << " independent handles, " << clients * queries
+              << " worker queries\n";
+    return true;
+}
+
 }
 
 int main(int argc, char** argv) {
     const std::string_view mode = argc == 2 ? argv[1] : "";
-    if (argc > 2 || (argc == 2 && mode != "--self-test" && mode != "--help")) {
-        std::cerr << "Usage: telemetry-client [--self-test | --help]\n";
+    if (argc > 2 || (argc == 2 && mode != "--self-test" && mode != "--stress" && mode != "--help")) {
+        std::cerr << "Usage: telemetry-client [--self-test | --stress | --help]\n";
         return 2;
     }
     if (mode == "--help") {
-        std::cout << "Usage: telemetry-client [--self-test | --help]\n";
+        std::cout << "Usage: telemetry-client [--self-test | --stress | --help]\n";
         return 0;
     }
     const Device device;
@@ -86,6 +133,9 @@ int main(int argc, char** argv) {
         const auto before = value;
         if (!self_test(device.handle, before, value)) return 1;
         std::cout << "PASS: unsupported IOCTL, unexpected input, short output and valid query\n";
+    } else if (mode == "--stress") {
+        const auto before = value;
+        if (!stress_test(device.handle, before, value)) return 1;
     }
     std::cout << "ABI version: " << value.abi_version << '\n'
               << "Driver uptime (ms): " << value.uptime_100ns / 10000 << '\n'
