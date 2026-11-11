@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.20)
+project(BnqqKernelTelemetry LANGUAGES CXX)
+
+include(CTest)
+if(WIN32)
+  add_executable(telemetry-client client/main.cpp)
+  target_compile_features(telemetry-client PRIVATE cxx_std_17)
+endif()
+if(BUILD_TESTING)
+  add_executable(telemetry-contract-test tests/contract.cpp)
+  target_compile_features(telemetry-contract-test PRIVATE cxx_std_17)
+  add_test(NAME telemetry-contract COMMAND telemetry-contract-test)
+endif()
